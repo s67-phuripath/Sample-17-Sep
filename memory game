@@ -1,6 +1,15 @@
 int[][] grid;  
+boolean[][] revealed;
 int rows = 3;  
 int cols = 4;  
+
+PVector firstClick = null;
+PVector secondClick = null;
+boolean waiting = false;
+int waitTime = 1000;
+int waitStartTime = 0;
+int pairsFound = 0; 
+int totalPairs;
 
 void setup() {
     size(500, 500);
@@ -9,21 +18,70 @@ void setup() {
     grid = new int[][]{{1, 1, 2, 2}, {3, 3, 4, 4}, {5, 5, 6, 6}};
     shuffleArray(grid);
 
+    revealed = new boolean[rows][cols]; 
+    totalPairs = (rows * cols) / 2;
+
+    textSize(34);
+}
+
+void draw() {
+    background(255);
     int w = width / cols; 
     int h = height / rows; 
 
-    textSize(34);
-    fill(0);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            //draw_lines(10 + j * w, 10 + i * h, grid[i][j]);
-            //println(i, j, grid[i][j]);
-            text(grid[i][j], 40 + j * w, 80 + i * h); 
-            
+            fill(revealed[i][j] ? color(0, 255, 0) : color(150, 0, 150)); 
+            rect(j * w, i * h, w, h); 
+
+            if (revealed[i][j]) {
+                fill(0);
+                text(grid[i][j], j * w + w / 2, i * h + h / 2); 
+            }
         }
+    }
+
+    if (waiting && millis() - waitStartTime >= waitTime) {
+        if (firstClick != null) {
+            revealed[int(firstClick.y)][int(firstClick.x)] = false; 
+        }
+        if (secondClick != null) {
+            revealed[int(secondClick.y)][int(secondClick.x)] = false; 
+        }
+        waiting = false; 
+        firstClick = null; 
+        secondClick = null; 
+    }
+
+    if (pairsFound == totalPairs) {
+        exit(); 
     }
 }
 
+void mousePressed() {
+    if (waiting) return; 
+    int col = mouseX / (width / cols); 
+    int row = mouseY / (height / rows); 
+
+    if (col >= 0 && col < cols && row >= 0 && row < rows && !revealed[row][col]) {
+        revealed[row][col] = true; 
+
+        if (firstClick == null) {
+            firstClick = new PVector(col, row); 
+        } else if (secondClick == null) {
+            secondClick = new PVector(col, row); 
+            if (grid[int(firstClick.y)][int(firstClick.x)] != grid[row][col]) {
+                waiting = true;
+                waitStartTime = millis(); 
+            } else {
+      
+                pairsFound++; 
+                firstClick = null;
+                secondClick = null;
+            }
+        }
+    }
+}
 
 void shuffleArray(int[][] array) {
     for (int i = 0; i < array.length; i++) {
@@ -34,11 +92,5 @@ void shuffleArray(int[][] array) {
             array[i][j] = array[randRow][randCol];
             array[randRow][randCol] = temp;
         }
-    }
-}
-
-void draw_lines(int x, int y, int n) {
-    for (int i = 0; i < n; i++) {
-        line(x + i * 20, y, x + i * 20, y + 40);
     }
 }
