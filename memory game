@@ -12,11 +12,14 @@ void setup() {
     int w = width / cols; 
     int h = height / rows; 
 
- 
+    textSize(34);
+    fill(0);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            draw_lines(10 + j * w, 10 + i * h, grid[i][j]);
-            println(i, j, grid[i][j]);
+            //draw_lines(10 + j * w, 10 + i * h, grid[i][j]);
+            //println(i, j, grid[i][j]);
+            text(grid[i][j], 40 + j * w, 80 + i * h); 
+            
         }
     }
 }
